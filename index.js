@@ -16,6 +16,13 @@ function judge(options){
 				reject('options required!');
 				return;
 			}
+			var required=['src','timelimit','compile'];
+			for(var k in required){
+				if(!options[required[k]]){
+					reject('options.'+required[k]+' required!');
+					return;
+				}
+			}
 			/*default values*/
 			var rs={
 				Accepted: 'AC',
