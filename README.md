@@ -4,6 +4,10 @@ A simple module to judge C/C++ program.(Linux only)
 ----------------
 using [EasySandbox](https://github.com/daveho/EasySandbox)
 
+Install:
+----------------
+`npm install simple-judger`
+
 Usage:
 ----------------
 ```javascript
