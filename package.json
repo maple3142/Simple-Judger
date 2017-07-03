@@ -1,0 +1,14 @@
+{
+  "name": "simple-judger",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodejs test.js"
+  },
+  "author": "maple3142",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^3.5.0"
+  }
+}
