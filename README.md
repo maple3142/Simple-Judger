@@ -10,7 +10,7 @@ Install:
 
 Usage:
 ----------------
-```javascript
+```js
 var sj=require('simple-judger');
 var options={
 	src: '#include<iostream>\nusing.......', //code !REQUIRED!
@@ -33,7 +33,7 @@ sj(options).then(result=>{
 ```
 Result Object:
 ----------------
-```javascript
+```js
 {
 	result: 'AC',
 	time: 10,
