@@ -2,11 +2,19 @@ var Promise = require('bluebird');
 var cp = require('child_process');
 var fs = Promise.promisifyAll(require('fs'));
 var path = require('path');
+var temppath = path.join(__dirname, 'temp');
 judge.write = write;
 judge.compile = compile;
 judge.exec = exec;
 judge.fx = fx;
+judge.setTemp = setTemp;
 module.exports = judge;
+function setTemp(p) {
+	if (!path.isAbsolute(p)) {
+		throw 'temp path must be absolute';
+	}
+	temppath = p;
+}
 function Result(result, time, extra) {
 	if (!extra) extra = '';
 	this.result = result;
@@ -27,6 +35,7 @@ function judge(options) {
 					return;
 				}
 			}
+			if (options.debug) console.log(__dirname);
 			/*default values*/
 			var rs = {
 				Accepted: 'AC',
@@ -49,28 +58,36 @@ function judge(options) {
 
 			var code = options.src;
 			var name = Math.random().toString(36).substring(7);
-			var source = path.join(__dirname, 'temp', name + '.cpp');
-			var dest = path.join(__dirname, 'temp', name + '.out');
+			var source = path.join(temppath, name + '.cpp');
+			var dest = path.join(temppath, name + '.out');
 			var compilecmd = options.compile.replace(/{([^\s]*)}/g, function (m, g) {
 				if (g === 'source') return source;
 				if (g === 'dest') return dest;
 			});
 			var timelimit = options.timelimit;
 			var execcmd = 'bash -c "source ./excute.sh ./' + path.join('temp', name + '.out') + '"';
+			if (options.debug) console.log(compilecmd);
+			if (options.debug) console.log(execcmd);
 			write(source, code).then(function () {
 				return compile(compilecmd);
 			}).catch(function (e) {
-				fs.unlinkAsync(source);
+				if (!options.debug) {
+					fs.unlinkAsync(source);
+				}
 				resolve(e);
 			}).then(function () {
 				return exec(execcmd, options.in, options.out, options.timelimit, options.result);
 			}).then(function (d) {
-				fs.unlinkAsync(source);
-				fs.unlinkAsync(dest);
+				if (!options.debug) {
+					fs.unlinkAsync(source);
+					fs.unlinkAsync(dest);
+				}
 				resolve(d);
 			}).catch(function (e) {
-				fs.unlinkAsync(source);
-				fs.unlinkAsync(dest);
+				if (!options.debug) {
+					fs.unlinkAsync(source);
+					fs.unlinkAsync(dest);
+				}
 				resolve(e);
 			});
 		}
@@ -119,7 +136,7 @@ function exec(cmd, input, output, limit, result) {
 			else out += s.toString();
 		});
 		px.on('close', function (code) {
-			var time = starttime - Date.now();
+			var time = Date.now() - starttime ;
 			if (code != 0) {/*Runtime_Error*/
 				reject(new Result(result.Runtime_Error, time, out));
 			}
