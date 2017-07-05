@@ -9,7 +9,7 @@ Install:
 
 Usage:
 ----------------
-```javascript=
+```javascript
 var judge=require('simple-judger');
 var options={
     src: `#include<iostream>
@@ -34,7 +34,7 @@ judge(options).then(result=>{
 ```
 Result Object:
 ----------------
-```javascript=
+```javascript
 {
     result: 'AC',
     time: 10,
