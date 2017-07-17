@@ -109,6 +109,9 @@ function compile(cmd,ce) {
 	return new Promise(function (resolve, reject) {
 		var c_process = cp.exec(cmd);
 		var c_out = '';
+		c_process.on('error', function(e) {
+			reject(new Result(ce, -1, c_out));
+		});
 		c_process.on('data', function (s) {
 			c_out += s.toString();
 		});
@@ -117,7 +120,7 @@ function compile(cmd,ce) {
 				reject(new Result(ce, -1, c_out));
 			}
 			else {
-				resolve();
+				resolve(0);
 			}
 		});
 	});
@@ -125,9 +128,12 @@ function compile(cmd,ce) {
 function exec(cmd, input, output, limit, result) {
 	return new Promise(function (resolve, reject) {
 		var px = cp.exec(cmd);
-		var starttime;
+		var starttime = Date.now();
 		px.stdin.write(input);
 		var out = '';
+		px.on('error', function (e) {
+			reject(new Result(result.System_Error, -1, e)); 
+		});
 		px.stdout.on('data', function (s) {
 			if (s.toString() === '<<entering SECCOMP mode>>\n') {
 				starttime = Date.now();/*real start time*/
