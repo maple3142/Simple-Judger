@@ -65,28 +65,28 @@ function judge(options) {
 				if (g === 'dest') return dest;
 			});
 			var timelimit = options.timelimit;
-			var execcmd = 'bash -c "source ./excute.sh ./' + path.join('temp', name + '.out') + '"';
+			var execcmd = 'bash -c "source ./excute.sh ' + path.join(temppath, name + '.out') + '"';
 			if (options.debug) console.log(compilecmd);
 			if (options.debug) console.log(execcmd);
 			write(source, code).then(function () {
-				return compile(compilecmd);
+				return compile(compilecmd,options.result.Compile_Error);
 			}).catch(function (e) {
 				if (!options.debug) {
-					fs.unlinkAsync(source);
+					fs.unlinkAsync(source).catch(e=>{});
 				}
 				resolve(e);
 			}).then(function () {
 				return exec(execcmd, options.in, options.out, options.timelimit, options.result);
 			}).then(function (d) {
 				if (!options.debug) {
-					fs.unlinkAsync(source);
-					fs.unlinkAsync(dest);
+					fs.unlinkAsync(source).catch(e=>{});
+					fs.unlinkAsync(dest).catch(e=>{});
 				}
 				resolve(d);
 			}).catch(function (e) {
 				if (!options.debug) {
-					fs.unlinkAsync(source);
-					fs.unlinkAsync(dest);
+					fs.unlinkAsync(source).catch(e=>{});
+					fs.unlinkAsync(dest).catch(e=>{});
 				}
 				resolve(e);
 			});
@@ -105,7 +105,7 @@ function fx(s) {
 function write(source, code) {
 	return fs.writeFileAsync(source, code);
 }
-function compile(cmd) {
+function compile(cmd,ce) {
 	return new Promise(function (resolve, reject) {
 		var c_process = cp.exec(cmd);
 		var c_out = '';
@@ -114,7 +114,7 @@ function compile(cmd) {
 		});
 		c_process.on('exit', function (code, sig) {
 			if (code != 0) {/*Compile_Error*/
-				reject(new Result(options.result.Compile_Error, -1, c_out));
+				reject(new Result(ce, -1, c_out));
 			}
 			else {
 				resolve();

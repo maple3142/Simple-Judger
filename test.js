@@ -9,9 +9,9 @@ fs.readFileAsync('./test.cpp').then(function (d) {
 		timelimit: 1000, //ms
 		compile: 'g++ -o {dest} {source}'
 	};
-	sj(options).then(result => {
-		console.log(result);
-	}).catch(error => {
-		console.error(error);
-	});
+	return sj(options);
+}).then(result => {
+	console.log(result);
+}).catch(error => {
+	console.error(error);
 });
