@@ -1,4 +1,4 @@
 #!/bin/bash
 #excute a program in EasySandbox
-echo $esb
+esb=$(echo "./esb/EasySandbox.so" | xargs realpath)
 LD_PRELOAD=$esb $1
