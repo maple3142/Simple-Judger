@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "nodejs test.js"
+    "test": "nodejs test.js",
+    "install": "(cd esb && make runtests)"
   },
   "author": "maple3142",
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.5.0"
-  }
+  },
+  "os" : [ "linux" ]
 }
