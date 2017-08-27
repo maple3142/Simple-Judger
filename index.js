@@ -1,5 +1,6 @@
 var Promise = require('bluebird');
 var cp = require('child_process');
+var chmod=require('chmod')
 var fs = Promise.promisifyAll(require('fs'));
 var path = require('path');
 var temppath = path.join(__dirname, 'temp');
@@ -76,6 +77,7 @@ function judge(options) {
 				}
 				resolve(e);
 			}).then(function () {
+				chmod(dest,775);
 				return exec(execcmd, options.in, options.out, options.timelimit, options.result);
 			}).then(function (d) {
 				if (!options.debug) {

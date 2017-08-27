@@ -5,7 +5,7 @@ using [EasySandbox](https://github.com/daveho/EasySandbox) for safety judge
 
 Install:
 ----------------
-`npm install simple-judger`
+sudo? `npm install simple-judger`
 
 Usage:
 ----------------
@@ -44,3 +44,13 @@ Result Object:
 ```
 
 run `npm test` for testing
+
+
+
+
+
+Installation Error:
+----------------
+if "permission denied" appear, add `sudo` then install again
+
+others error please create a `Issue` on github

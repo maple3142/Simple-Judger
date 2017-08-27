@@ -1,6 +1,6 @@
 {
   "name": "simple-judger",
-  "version": "1.4.3",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,14 @@
   "author": "maple3142",
   "license": "ISC",
   "dependencies": {
-    "bluebird": "^3.5.0"
+    "bluebird": "^3.5.0",
+    "chmod": "^0.2.1"
   },
-  "os" : [ "linux" ]
+  "os": [
+    "linux"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maple3142/Simple-Judger.git"
+  }
 }
