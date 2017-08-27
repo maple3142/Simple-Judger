@@ -1,11 +1,10 @@
 {
   "name": "simple-judger",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "nodejs test.js",
-    "install": "(cd esb && make runtests)"
+    "test": "nodejs test.js"
   },
   "author": "maple3142",
   "license": "ISC",
