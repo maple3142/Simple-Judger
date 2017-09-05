@@ -1,3 +1,7 @@
+/**
+ * a module to judge C/C++ code in sandbox
+ * @module simple-judger
+ */
 var Promise = require('bluebird');
 var cp = require('child_process');
 var chmod=require('chmod')
@@ -8,20 +12,42 @@ judge.write = write;
 judge.compile = compile;
 judge.exec = exec;
 judge.fx = fx;
-judge.setTemp = setTemp;
-module.exports = judge;
-function setTemp(p) {
-	if (!path.isAbsolute(p)) {
-		throw 'temp path must be absolute';
-	}
-	temppath = p;
-}
 function Result(result, time, extra) {
 	if (!extra) extra = '';
 	this.result = result;
 	this.time = time;
 	this.extra = extra;
 }
+/**
+ * result object
+ * direct create with object literal
+ * @typedef {object} Result
+ * @property {string=} Accepted default: AC
+ * @property {string=} Runtime_Error default: RE
+ * @property {string=} Time_Limit_Exceeded default: TLE
+ * @property {string=} Compile_Error default: CE
+ * @property {string=} Wrong_Answer default: WA
+ * @property {string=} System_Error default: SE
+ */
+var rs = {
+	Accepted: 'AC',
+	Runtime_Error: 'RE',
+	Time_Limit_Exceeded: 'TLE',
+	Compile_Error: 'CE',
+	Wrong_Answer: 'WA',
+	System_Error: 'SE'
+};
+/**
+ * judge function
+ * @alias module:simple-judger
+ * @param {object} options option object
+ * @param {string} options.src C/C++ code
+ * @param {string} options.compile compile command like "g++ -o {out} {dest}"
+ * @param {number} options.timelimit timelimie
+ * @param {string=} options.in input string(remember add \n at end of input)
+ * @param {string=} options.out output string
+ * @param {Result=} options.result custom result strings
+ */
 function judge(options) {
 	return new Promise(function (resolve, reject) {
 		try {
@@ -31,21 +57,12 @@ function judge(options) {
 			}
 			var required = ['src', 'timelimit', 'compile'];
 			for (var k in required) {
-				if (!options[required[k]]) {
+				if (!(required[k] in options)) {
 					reject('options.' + required[k] + ' required!');
 					return;
 				}
 			}
 			if (options.debug) console.log(__dirname);
-			/*default values*/
-			var rs = {
-				Accepted: 'AC',
-				Runtime_Error: 'RE',
-				Time_Limit_Exceeded: 'TLE',
-				Compile_Error: 'CE',
-				Wrong_Answer: 'WA',
-				System_Error: 'SE'
-			};
 			if (!options.result)
 				options.result = {};
 			for (var k in rs) {
@@ -66,7 +83,7 @@ function judge(options) {
 				if (g === 'dest') return dest;
 			});
 			var timelimit = options.timelimit;
-			var execcmd = 'bash -c "source ./excute.sh ' + path.join(temppath, name + '.out') + '"';
+			var execcmd = 'bash -c "source ./execute.sh ' + path.join(temppath, name + '.out') + '"';
 			if (options.debug) console.log(compilecmd);
 			if (options.debug) console.log(execcmd);
 			write(source, code).then(function () {
@@ -98,6 +115,7 @@ function judge(options) {
 		}
 	});
 };
+module.exports = judge;
 
 function fx(s) {
 	s = s.replace(/(\r\n|\r)/g, '\n');//crlf convert

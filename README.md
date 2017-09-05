@@ -3,6 +3,8 @@ Simple Judger
 A simple npm module to judge C/C++ program.(Linux only)
 using [EasySandbox](https://github.com/daveho/EasySandbox) for safety judge
 
+**[jsdoc link](https://maple3142.github.io/docs/simple-judger/)**
+
 Install:
 ----------------
 sudo? `npm install simple-judger`
@@ -44,10 +46,6 @@ Result Object:
 ```
 
 run `npm test` for testing
-
-
-
-
 
 Installation Error:
 ----------------
