@@ -4,7 +4,7 @@
  */
 var Promise = require('bluebird')
 var cp = require('child_process')
-var chmod=require('chmod')
+var chmod = require('chmod')
 var fs = Promise.promisifyAll(require('fs'))
 var path = require('path')
 var temppath = path.join(__dirname, 'temp')
@@ -19,25 +19,6 @@ function Result(result, time, extra) {
 	this.extra = extra
 }
 /**
- * result object
- * direct create with object literal
- * @typedef {object} Result
- * @property {string=} Accepted default: AC
- * @property {string=} Runtime_Error default: RE
- * @property {string=} Time_Limit_Exceeded default: TLE
- * @property {string=} Compile_Error default: CE
- * @property {string=} Wrong_Answer default: WA
- * @property {string=} System_Error default: SE
- */
-var rs = {
-	Accepted: 'AC',
-	Runtime_Error: 'RE',
-	Time_Limit_Exceeded: 'TLE',
-	Compile_Error: 'CE',
-	Wrong_Answer: 'WA',
-	System_Error: 'SE'
-}
-/**
  * judge function
  * @alias module:simple-judger
  * @param {object} options option object
@@ -46,7 +27,8 @@ var rs = {
  * @param {number} options.timelimit timelimie
  * @param {string=} options.in input string(remember add \n at end of input)
  * @param {string=} options.out output string
- * @param {Result=} options.result custom result strings
+ * @param {Result=} options.result custom result strings {@link Result} object
+ * @property {Result} Result default result object
  */
 function judge(options) {
 	return new Promise(function (resolve, reject) {
@@ -65,7 +47,7 @@ function judge(options) {
 			if (options.debug) console.log(__dirname)
 			if (!options.result)
 				options.result = {}
-			for (var k in rs) {
+			for (var k in this.Result) {
 				if (!options.result[k])
 					options.result[k] = rs[k]
 			}
@@ -87,25 +69,25 @@ function judge(options) {
 			if (options.debug) console.log(compilecmd)
 			if (options.debug) console.log(execcmd)
 			write(source, code).then(function () {
-				return compile(compilecmd,options.result.Compile_Error)
+				return compile(compilecmd, options.result.Compile_Error)
 			}).catch(function (e) {
 				if (!options.debug) {
-					fs.unlinkAsync(source).catch(e=>{})
+					fs.unlinkAsync(source).catch(e => { })
 				}
 				resolve(e)
 			}).then(function () {
-				chmod(dest,775)
+				chmod(dest, 775)
 				return exec(execcmd, options.in, options.out, options.timelimit, options.result)
 			}).then(function (d) {
 				if (!options.debug) {
-					fs.unlinkAsync(source).catch(e=>{})
-					fs.unlinkAsync(dest).catch(e=>{})
+					fs.unlinkAsync(source).catch(e => { })
+					fs.unlinkAsync(dest).catch(e => { })
 				}
 				resolve(d)
 			}).catch(function (e) {
 				if (!options.debug) {
-					fs.unlinkAsync(source).catch(e=>{})
-					fs.unlinkAsync(dest).catch(e=>{})
+					fs.unlinkAsync(source).catch(e => { })
+					fs.unlinkAsync(dest).catch(e => { })
 				}
 				resolve(e)
 			})
@@ -114,6 +96,25 @@ function judge(options) {
 			resolve(new Result(options.result.System_Error, -1, e))
 		}
 	})
+}
+/**
+ * default result object
+ * can be access by require('simple-judger').Result
+ * @typedef {object} Result
+ * @property {string=} Accepted default: AC
+ * @property {string=} Runtime_Error default: RE
+ * @property {string=} Time_Limit_Exceeded default: TLE
+ * @property {string=} Compile_Error default: CE
+ * @property {string=} Wrong_Answer default: WA
+ * @property {string=} System_Error default: SE
+ */
+judge.Result = {
+	Accepted: 'AC',
+	Runtime_Error: 'RE',
+	Time_Limit_Exceeded: 'TLE',
+	Compile_Error: 'CE',
+	Wrong_Answer: 'WA',
+	System_Error: 'SE'
 }
 module.exports = judge
 
@@ -125,11 +126,11 @@ function fx(s) {
 function write(source, code) {
 	return fs.writeFileAsync(source, code)
 }
-function compile(cmd,ce) {
+function compile(cmd, ce) {
 	return new Promise(function (resolve, reject) {
 		var c_process = cp.exec(cmd)
 		var c_out = ''
-		c_process.on('error', function(e) {
+		c_process.on('error', function (e) {
 			reject(new Result(ce, -1, c_out))
 		})
 		c_process.on('data', function (s) {
@@ -152,7 +153,7 @@ function exec(cmd, input, output, limit, result) {
 		px.stdin.write(input)
 		var out = ''
 		px.on('error', function (e) {
-			reject(new Result(result.System_Error, -1, e)) 
+			reject(new Result(result.System_Error, -1, e))
 		})
 		px.stdout.on('data', function (s) {
 			if (s.toString() === '<<entering SECCOMP mode>>\n') {
@@ -162,7 +163,7 @@ function exec(cmd, input, output, limit, result) {
 			else out += s.toString()
 		})
 		px.on('close', function (code) {
-			var time = Date.now() - starttime 
+			var time = Date.now() - starttime
 			if (code != 0) {/*Runtime_Error*/
 				reject(new Result(result.Runtime_Error, time, out))
 			}

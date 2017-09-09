@@ -70,3 +70,24 @@ describe('judge test', function () {
 		})
 	})
 })
+
+describe('default Results', function () {
+	it('AC', () => {
+		should(sj.Result.Accepted).equal('AC')
+	})
+	it('WA', () => {
+		should(sj.Result.Wrong_Answer).equal('WA')
+	})
+	it('CE', () => {
+		should(sj.Result.Compile_Error).equal('CE')
+	})
+	it('SE', () => {
+		should(sj.Result.System_Error).equal('SE')
+	})
+	it('TLE', () => {
+		should(sj.Result.Time_Limit_Exceeded).equal('TLE')
+	})
+	it('RE', () => {
+		should(sj.Result.Runtime_Error).equal('RE')
+	})
+})
