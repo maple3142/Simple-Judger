@@ -1,18 +1,11 @@
+Error.stackTraceLimit = Infinity
+
 const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs'))
+const fs = require('fs')
 const sj = require('../index.js')
 const should = require('should')
 const options = {
-	src: `#include<iostream>
-	using namespace std;
-	
-	int main(void){
-		int a,b;
-		cin>>a>>b;
-		cout<<a+b<<endl;
-		return 0;
-	}
-	`,
+	src: fs.readFileSync(__dirname+'/test.cpp'),
 	in: '2 5\n',
 	out: '7',
 	timelimit: 1000, 
@@ -20,7 +13,7 @@ const options = {
 }
 
 describe('judge test', function () {
-	this.timeout(1000)
+	this.timeout(10000)
 	it('AC', done => {
 		let opt = Object.assign({}, options)
 		sj(opt).then(r => {
@@ -47,6 +40,14 @@ describe('judge test', function () {
 	it('CE', done => {
 		let opt = Object.assign({}, options)
 		opt.src = ''
+		sj(opt).then(r => {
+			r.result.should.equal('CE')
+			done()
+		})
+	})
+	it('CE: #include "/dev/random"', done => {/* this test may be slow */
+		let opt = Object.assign({}, options) 
+		opt.src = `#include "/dev/random"`
 		sj(opt).then(r => {
 			r.result.should.equal('CE')
 			done()

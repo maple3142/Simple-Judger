@@ -5,13 +5,12 @@
 var Promise = require('bluebird')
 var cp = require('child_process')
 var chmod = require('chmod')
+
+var ex = require('./exec')
+
 var fs = Promise.promisifyAll(require('fs'))
 var path = require('path')
 var temppath = path.join(__dirname, 'temp')
-judge.write = write
-judge.compile = compile
-judge.exec = exec
-judge.fx = fx
 function Result(result, time, extra) {
 	if (!extra) extra = ''
 	this.result = result
@@ -47,9 +46,9 @@ function judge(options) {
 			if (options.debug) console.log(__dirname)
 			if (!options.result)
 				options.result = {}
-			for (var k in this.Result) {
-				if (!options.result[k])
-					options.result[k] = rs[k]
+			for (var k in judge.Result) {
+				if (!(k in options.result))
+					options.result[k] = judge.Result[k]
 			}
 			if (!options.in)
 				options.in = ''
@@ -68,7 +67,7 @@ function judge(options) {
 			var execcmd = 'bash -c "source ./execute.sh ' + path.join(temppath, name + '.out') + '"'
 			if (options.debug) console.log(compilecmd)
 			if (options.debug) console.log(execcmd)
-			write(source, code).then(function () {
+			fs.writeFileAsync(source, code).then(function () {
 				return compile(compilecmd, options.result.Compile_Error)
 			}).catch(function (e) {
 				if (!options.debug) {
@@ -123,62 +122,39 @@ function fx(s) {
 	if (s.endsWith('\n')) s = s.slice(0, -1)//remove empty line
 	return s
 }
-function write(source, code) {
-	return fs.writeFileAsync(source, code)
-}
 function compile(cmd, ce) {
 	return new Promise(function (resolve, reject) {
-		var c_process = cp.exec(cmd)
-		var c_out = ''
-		c_process.on('error', function (e) {
-			reject(new Result(ce, -1, c_out))
-		})
-		c_process.on('data', function (s) {
-			c_out += s.toString()
-		})
-		c_process.on('exit', function (code, sig) {
-			if (code != 0) {/*Compile_Error*/
-				reject(new Result(ce, -1, c_out))
+		ex(cmd, 5000, '').then(function (r) {
+			if (r.code !== 0) {
+				reject(new Result(ce,-1,r.output))
 			}
 			else {
 				resolve(0)
 			}
+		}).catch(function (e) {
+			reject(new Result(ce, -1, e.output))
 		})
 	})
 }
 function exec(cmd, input, output, limit, result) {
 	return new Promise(function (resolve, reject) {
-		var px = cp.exec(cmd)
-		var starttime = Date.now()
-		px.stdin.write(input)
-		var out = ''
-		px.on('error', function (e) {
-			reject(new Result(result.System_Error, -1, e))
-		})
-		px.stdout.on('data', function (s) {
-			if (s.toString() === '<<entering SECCOMP mode>>\n') {
-				starttime = Date.now()/*real start time*/
-				return
+		ex(cmd, limit, input).then(function (r) {
+			if (r.code !== 0) {/*Runtime_Error*/
+				reject(new Result(result.Runtime_Error, r.time, r.output))
 			}
-			else out += s.toString()
-		})
-		px.on('close', function (code) {
-			var time = Date.now() - starttime
-			if (code != 0) {/*Runtime_Error*/
-				reject(new Result(result.Runtime_Error, time, out))
-			}
-			else if (fx(out) === fx(output)) {/*Accepted*/
-				resolve(new Result(result.Accepted, time, out))
+			else if(fx(r.output.split('\n').slice(1).join('\n'))===fx(output)){/*Accepted*/
+				resolve(new Result(result.Accepted, r.time, r.output))
 			}
 			else {/*Wrong_Answer*/
-				reject(new Result(result.Wrong_Answer, time, out))
+				reject(new Result(result.Wrong_Answer, r.time, r.outout))
 			}
-			px = null
+		}).catch(function (e) {
+			if (e.type === 'TLE') {
+				reject(new Result(result.Time_Limit_Exceeded, e.time, e.output))
+			}
+			else {
+				reject(new Result(result.System_Error, -1, e.error))
+			}
 		})
-		setTimeout(function () {/*Time_Limit_Exceeded*/
-			if (!px) return
-			px.kill()
-			reject(new Result(result.Time_Limit_Exceeded, Date.now() - starttime, out))
-		}, limit)
 	})
 }
