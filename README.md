@@ -1,5 +1,7 @@
 Simple Judger
 ================
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/maple3142/Simple-Judger.svg)](https://greenkeeper.io/)
 A simple npm module to judge C/C++ program.(Linux only)
 using [EasySandbox](https://github.com/daveho/EasySandbox) for safety judge
 
